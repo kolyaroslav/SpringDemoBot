@@ -1,4 +1,4 @@
-package ver1.SpringDemoBot.Config;
+package ver1.SpringDemoBot.сonfig;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;

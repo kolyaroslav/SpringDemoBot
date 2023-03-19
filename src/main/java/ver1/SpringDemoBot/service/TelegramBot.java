@@ -1,4 +1,4 @@
-package ver1.SpringDemoBot.Service;
+package ver1.SpringDemoBot.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +11,11 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ver1.SpringDemoBot.Config.BotConfig;
-import ver1.SpringDemoBot.Model.User;
-import ver1.SpringDemoBot.Model.UserRepository;
+import ver1.SpringDemoBot.сonfig.BotConfig;
+import ver1.SpringDemoBot.model.User;
+import ver1.SpringDemoBot.model.UserRepository;
 
 import java.sql.Timestamp;
-import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.List;

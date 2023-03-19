@@ -1,4 +1,4 @@
-package ver1.SpringDemoBot.Model;
+package ver1.SpringDemoBot.model;
 
 import org.springframework.data.repository.CrudRepository;
 
