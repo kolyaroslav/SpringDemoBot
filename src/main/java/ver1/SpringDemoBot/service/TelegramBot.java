@@ -3,6 +3,7 @@ package ver1.SpringDemoBot.service;
 import com.vdurmont.emoji.EmojiParser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
@@ -17,6 +18,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ver1.SpringDemoBot.model.Ads;
+import ver1.SpringDemoBot.model.AdsRepository;
 import ver1.SpringDemoBot.сonfig.BotConfig;
 import ver1.SpringDemoBot.model.User;
 import ver1.SpringDemoBot.model.UserRepository;
@@ -31,9 +34,16 @@ import java.util.List;
 public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private AdsRepository adsRepository;
     final BotConfig config;
     static final String HELP_TEXT = "Это дипломная работа по созданию Бота,\nкоторый будет по номеру Контейнера или Коносамента выдавать инофрмацию\nо дате отплытия и дате прибытия в порт контейнера." +
             "\nНапишите /start для получения привественного сообщения.";
+
+    static final String YES_BUTTON = "YES_BUTTON";
+    static final String NO_BUTTON = "NO_BUTTON";
+
+    static final String ERROR_TEXT = "Error occurred: ";
 
     //кнопка /help
     public TelegramBot(BotConfig config) {
@@ -63,31 +73,34 @@ public class TelegramBot extends TelegramLongPollingBot {
                 var textToSend = EmojiParser.parseToUnicode(messageText.substring(messageText.indexOf(" ")));
                 var users = userRepository.findAll();
                 for (User user: users){
-                    sendMessage(user.getChatId(), textToSend);
+                    prepareAndSendMessage(user.getChatId(), textToSend);
                 }
             }
+
+            else {
 //Ендпоінти Бота
-            switch (messageText) {
-                case "/start":
-                    reigsterUser(update.getMessage());
+                switch (messageText) {
+                    case "/start":
+                        reigsterUser(update.getMessage());
 
-                    startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                    break;
+                        startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
+                        break;
 
-                case "/info":
-                    sendMessage(chatId, HELP_TEXT);
-                    break;
+                    case "/info":
+                        prepareAndSendMessage(chatId, HELP_TEXT);
+                        break;
 
-                case "/register":
-                    register(chatId);
-                    break;
-
-
-                default:
-
-                    sendMessage(chatId, "Я пока мало чего умею, но обязательно научусь!\n" + "Please Stand By");
+                    case "/register":
+                        register(chatId);
+                        break;
 
 
+                    default:
+
+                        prepareAndSendMessage(chatId, "Я пока мало чего умею, но обязательно научусь!\n" + "Please Stand By");
+
+
+                }
             }
 
         } else if (update.hasCallbackQuery()) {
@@ -95,28 +108,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             long messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            if (callBackData.equals("YES_BUTTON")) {
+            if (callBackData.equals(YES_BUTTON)) {
     String text = "Вы нажали конопку Да. С ув. Ваш Кэп";
-                EditMessageText message = new EditMessageText();
-                message.setChatId(String.valueOf(chatId));
-                message.setText(text);
-                message.setMessageId((int) messageId);
-                try {
-                    execute(message);
-                } catch (TelegramApiException e) {
-                    log.error("Error occurred: " + e.getMessage());
-                }
-            } else if (callBackData.equals("NO_BUTTON")) {
+                executeEditMessageText(text, chatId, messageId);
+
+            } else if (callBackData.equals(NO_BUTTON)) {
                 String text = "Вы нажали конопку Нет. С ув. Ваш Кэп";
-                EditMessageText message = new EditMessageText();
-                message.setChatId(String.valueOf(chatId));
-                message.setText(text);
-                message.setMessageId((int) messageId);
-                try {
-                    execute(message);
-                } catch (TelegramApiException e) {
-                    log.error("Error occurred: " + e.getMessage());
-                }
+                executeEditMessageText(text, chatId, messageId);
             }
 
         }
@@ -132,12 +130,12 @@ public class TelegramBot extends TelegramLongPollingBot {
         var yesButton = new InlineKeyboardButton();
 
         yesButton.setText("Да");
-        yesButton.setCallbackData("YES_BUTTON");
+        yesButton.setCallbackData(YES_BUTTON);
 
         var noButton = new InlineKeyboardButton();
 
         noButton.setText("Нет");
-        noButton.setCallbackData("NO_BUTTON");
+        noButton.setCallbackData(NO_BUTTON);
 
         rowInline.add(yesButton);
         rowInline.add(noButton);
@@ -146,11 +144,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         markupInline.setKeyboard(rowsInline);
         message.setReplyMarkup(markupInline);
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
-        }
+        executeMessage(message);
     }
 
     private void reigsterUser(Message msg) {
@@ -210,12 +204,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         message.setReplyMarkup(keyboardMarkup);
 
-
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Error occurred: " + e.getMessage());
-        }
+        executeMessage(message);
 
     }
 
@@ -228,4 +217,43 @@ public class TelegramBot extends TelegramLongPollingBot {
     public String getBotToken() {
         return config.getBotToken();
     }
+
+    private  void executeEditMessageText(String text, long chatId, long messageId) {
+        EditMessageText message = new EditMessageText();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(text);
+        message.setMessageId((int) messageId);
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error(ERROR_TEXT + e.getMessage());
+        }
+    }
+
+    private void executeMessage(SendMessage message){
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error(ERROR_TEXT + e.getMessage());
+        }
+
+    }
+
+    private void prepareAndSendMessage(long chatId, String textToSend){
+        SendMessage message = new SendMessage();
+        message.setChatId(String.valueOf(chatId));
+        message.setText(textToSend);
+        executeMessage(message);
+    }
+@Scheduled(cron = "${cron.scheduler}")
+    private void sendAds(){
+var ads = adsRepository.findAll();
+var users = userRepository.findAll();
+for(Ads ad: ads){
+    for (User user: users){
+        prepareAndSendMessage(user.getChatId(), ad.getAd());
+    }
+}
+    }
+
 }
