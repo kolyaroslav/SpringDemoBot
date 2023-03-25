@@ -7,8 +7,8 @@ import java.sql.Timestamp;
 @Entity(name = "usersDataTable")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id", nullable = false)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @Column(name = "chatId", nullable = false)
     private Long chatId;
     private String firstName;
     private String lastName;
