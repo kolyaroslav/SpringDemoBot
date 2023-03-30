@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -18,12 +19,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ver1.SpringDemoBot.model.Ads;
-import ver1.SpringDemoBot.model.AdsRepository;
+import ver1.SpringDemoBot.model.*;
 import ver1.SpringDemoBot.сonfig.BotConfig;
-import ver1.SpringDemoBot.model.User;
-import ver1.SpringDemoBot.model.UserRepository;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
@@ -52,7 +51,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "get welcome message"));
 //        listOfCommands.add(new BotCommand("/mydata", "get your data stored"));
-          listOfCommands.add(new BotCommand("/register", "поклацать"));
+        listOfCommands.add(new BotCommand("/register", "поклацать"));
 //        listOfCommands.add(new BotCommand("/deletedata","delete my data"));
         listOfCommands.add(new BotCommand("/info", "Информация о Боте"));
 //        listOfCommands.add(new BotCommand("/settings","set your preferences"));
@@ -65,19 +64,18 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        ShippingInfo shippingInfo = new ShippingInfo();
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
-            if (messageText.contains("/send") && config.getOwnerId() == chatId){
+            if (messageText.contains("/send") && config.getOwnerId() == chatId) {
                 var textToSend = EmojiParser.parseToUnicode(messageText.substring(messageText.indexOf(" ")));
                 var users = userRepository.findAll();
-                for (User user: users){
+                for (User user : users) {
                     prepareAndSendMessage(user.getChatId(), textToSend);
                 }
-            }
-
-            else {
+            } else {
 //Ендпоінти Бота
                 switch (messageText) {
                     case "/start":
@@ -96,10 +94,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
                     default:
-
-                        prepareAndSendMessage(chatId, "Я пока мало чего умею, но обязательно научусь!\n" + "Please Stand By");
-
-
+//
+//                        prepareAndSendMessage(chatId, "Я пока мало чего умею, но обязательно научусь!\n" + "Please Stand By");
+                    try{
+                        prepareAndSendMessage(chatId, Cont.getContInfo(messageText,shippingInfo));
+                    } catch (IOException e) {
+                        prepareAndSendMessage(chatId, "Information Not found");
+                    }
+//
                 }
             }
 
@@ -109,7 +111,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
             if (callBackData.equals(YES_BUTTON)) {
-    String text = "Вы нажали конопку Да. С ув. Ваш Кэп";
+                String text = "Вы нажали конопку Да. С ув. Ваш Кэп";
                 executeEditMessageText(text, chatId, messageId);
 
             } else if (callBackData.equals(NO_BUTTON)) {
@@ -169,7 +171,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String name) {
         //создаем ответ с эмоджи
-        String answer = EmojiParser.parseToUnicode("Привет " + name + ", это Чат Бот Ярослава. \n" + "Это первая попытка создания бота.\n" + "Дальше будет интереснее." + ":blush:" + ":ship:");
+        String answer = EmojiParser.parseToUnicode("Привет " + name + ", это Чат Бот Ярослава. \n" + "Это первая попытка создания бота.\n" + "Просто вставьте и отправьте номер контейнера, если к нему есть информация, выдаст результат." + ":blush:" + ":ship:");
         // String answer = ;
         log.info("Replied to user " + name);
         sendMessage(chatId, answer);
@@ -218,7 +220,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         return config.getBotToken();
     }
 
-    private  void executeEditMessageText(String text, long chatId, long messageId) {
+    private void executeEditMessageText(String text, long chatId, long messageId) {
         EditMessageText message = new EditMessageText();
         message.setChatId(String.valueOf(chatId));
         message.setText(text);
@@ -230,7 +232,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void executeMessage(SendMessage message){
+    private void executeMessage(SendMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
@@ -239,21 +241,22 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
-    private void prepareAndSendMessage(long chatId, String textToSend){
+    private void prepareAndSendMessage(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
         executeMessage(message);
     }
-@Scheduled(cron = "${cron.scheduler}")
-    private void sendAds(){
-var ads = adsRepository.findAll();
-var users = userRepository.findAll();
-for(Ads ad: ads){
-    for (User user: users){
-        prepareAndSendMessage(user.getChatId(), ad.getAd());
-    }
-}
+
+    @Scheduled(cron = "${cron.scheduler}")
+    private void sendAds() {
+        var ads = adsRepository.findAll();
+        var users = userRepository.findAll();
+        for (Ads ad : ads) {
+            for (User user : users) {
+                prepareAndSendMessage(user.getChatId(), ad.getAd());
+            }
+        }
     }
 
 }

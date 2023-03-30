@@ -1,0 +1,141 @@
+{
+    "isContainerSearch": true,
+    "origin": {
+        "terminal": "Tianjin PAC Intl Cntr Terminal",
+        "geo_site": "0SRFNSTBRTEBE",
+        "city": "Xingang",
+        "state": "Tianjin",
+        "country": "China",
+        "country_code": "CN",
+        "geoid_city": "02GYFH4R8RVY6",
+        "site_type": "TERMINAL"
+    },
+    "destination": {
+        "terminal": "DCT Gdansk sa",
+        "geo_site": "02RB4MMG6P32M",
+        "city": "Gdansk",
+        "state": "",
+        "country": "Poland",
+        "country_code": "PL",
+        "geoid_city": "3RIGHAIZMGKN3",
+        "site_type": "TERMINAL"
+    },
+    "containers": [
+        {
+            "container_num": "MSKU4688772",
+            "container_size": "45",
+            "container_type": "DRY",
+            "iso_code": "L5G0",
+            "operator": "MAEU",
+            "locations": [
+                {
+                    "terminal": "Tianjin Zhenhua Int. Trans. Co. LTD",
+                    "geo_site": "17VGLQK9WQSLA",
+                    "city": "Xingang",
+                    "state": "Tianjin",
+                    "country": "China",
+                    "country_code": "CN",
+                    "geoid_city": "02GYFH4R8RVY6",
+                    "site_type": "DEPOT",
+                    "events": [
+                        {
+                            "activity": "GATE-OUT-EMPTY",
+                            "stempty": true,
+                            "actfor": "EXP",
+                            "vessel_name": "MANCHESTER MAERSK",
+                            "voyage_num": "309W",
+                            "vessel_num": "Y30",
+                            "actual_time": "2023-02-22T00:40:00.000",
+                            "rkem_move": "GATE-OUT",
+                            "is_cancelled": false,
+                            "is_current": false
+                        }
+                    ]
+                },
+                {
+                    "terminal": "Tianjin PAC Intl Cntr Terminal",
+                    "geo_site": "0SRFNSTBRTEBE",
+                    "city": "Xingang",
+                    "state": "Tianjin",
+                    "country": "China",
+                    "country_code": "CN",
+                    "geoid_city": "02GYFH4R8RVY6",
+                    "site_type": "TERMINAL",
+                    "events": [
+                        {
+                            "activity": "GATE-IN",
+                            "stempty": false,
+                            "actfor": "EXP",
+                            "vessel_name": "MANCHESTER MAERSK",
+                            "voyage_num": "309W",
+                            "vessel_num": "Y30",
+                            "expected_time": "2023-03-01T20:00:00.000",
+                            "actual_time": "2023-02-27T19:11:00.000",
+                            "rkem_move": "GATE-IN",
+                            "is_cancelled": false,
+                            "is_current": false
+                        },
+                        {
+                            "activity": "LOAD",
+                            "stempty": false,
+                            "actfor": "",
+                            "vessel_name": "MANCHESTER MAERSK",
+                            "voyage_num": "309W",
+                            "vessel_num": "Y30",
+                            "expected_time": "2023-03-01T20:00:00.000",
+                            "actual_time": "2023-03-01T17:34:00.000",
+                            "rkem_move": "LOAD",
+                            "is_cancelled": false,
+                            "is_current": true
+                        }
+                    ]
+                },
+                {
+                    "terminal": "DCT Gdansk sa",
+                    "geo_site": "02RB4MMG6P32M",
+                    "city": "Gdansk",
+                    "state": "",
+                    "country": "Poland",
+                    "country_code": "PL",
+                    "geoid_city": "3RIGHAIZMGKN3",
+                    "site_type": "TERMINAL",
+                    "events": [
+                        {
+                            "activity": "DISCHARG",
+                            "stempty": false,
+                            "actfor": "EXP",
+                            "vessel_name": "MANCHESTER MAERSK",
+                            "voyage_num": "309W",
+                            "vessel_num": "Y30",
+                            "expected_time": "2023-04-14T18:00:00.000",
+                            "is_current": false
+                        },
+                        {
+                            "activity": "GATE-OUT",
+                            "stempty": false,
+                            "actfor": "DEL",
+                            "vessel_name": "MANCHESTER MAERSK",
+                            "voyage_num": "309W",
+                            "vessel_num": "Y30",
+                            "expected_time": "2023-04-14T18:00:00.000",
+                            "is_current": false
+                        }
+                    ]
+                }
+            ],
+            "eta_final_delivery": "2023-04-14T18:00:00.000",
+            "latest": {
+                "actual_time": "2023-03-01T17:34:00.000",
+                "activity": "LOAD",
+                "stempty": false,
+                "actfor": "",
+                "geo_site": "0SRFNSTBRTEBE",
+                "city": "Xingang",
+                "state": "Tianjin",
+                "country": "China",
+                "country_code": "CN"
+            },
+            "status": "IN-PROGRESS"
+        }
+    ]
+}
