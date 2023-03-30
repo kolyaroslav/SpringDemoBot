@@ -1,6 +1,7 @@
 package ver1.SpringDemoBot.model;
 
 import netscape.javascript.JSObject;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -20,13 +21,35 @@ public class Cont {
         }
 
         JSONObject object = new JSONObject(result);
+        final JSONObject origin = object.getJSONObject("origin"); // заходимо в обєкт
+        String cityFrom = (String) origin.get("city"); // дістаємо з обєкту строку значення city
+        String countryFrom = (String) origin.get("country");
+        final JSONObject destination = object.getJSONObject("destination");
+        String cityTo = (String) destination.get("city");
+        String countryTo = (String) destination.get("country");
 
-        shippingInfo.setOrigin(object.getString("city"));
-        shippingInfo.setOrigin(object.getString("country"));
-        shippingInfo.setDestination(object.getString("city"));
-        shippingInfo.setDestination(object.getString("country"));
+        final JSONArray container = object.getJSONArray("containers");
+        final int n = container.length();
+        String contNum = null;
+        String contSize = null;
+        String eta = null;
+        for (int i = 0; i < n; ++i) {
+            final JSONObject cont_num = container.getJSONObject(i);
+            contNum = container.getJSONObject(i).getString("container_num");
+            contSize = container.getJSONObject(i).getString("container_size");
+            eta = container.getJSONObject(i).getString("eta_final_delivery");
+        }
 
-        return "FROM: " + shippingInfo.getOrigin();
+
+        return "Container №: " + contNum + "\n" +
+                "Container size: " + contSize + "\n" +
+                "FROM: \n" + cityFrom + "\n"
+                + countryFrom + "\n\n" +
+                "TO: " + cityTo + "\n" +
+                countryTo + "\n"
+                + "\n" + "ETA: " + eta
+
+                ;
 //        return result;
     }
 
