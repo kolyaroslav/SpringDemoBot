@@ -1,11 +1,12 @@
 package ver1.SpringDemoBot.service;
 
 import com.vdurmont.emoji.EmojiParser;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.ui.Model;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -22,7 +23,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ver1.SpringDemoBot.model.*;
 import ver1.SpringDemoBot.сonfig.BotConfig;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
@@ -36,8 +36,12 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
     private AdsRepository adsRepository;
     final BotConfig config;
-    static final String HELP_TEXT = "Это дипломная работа по созданию Бота,\nкоторый будет по номеру Контейнера или Коносамента выдавать инофрмацию\nо дате отплытия и дате прибытия в порт контейнера." +
-            "\nНапишите /start для получения привественного сообщения.";
+    static final String HELP_TEXT = "Це дипломана робота Ярослава Ковальчука по розробці Чат бота на Java.\n" +
+            "За номером Контейнера, бот видає інформацію звідки та " + "\n" +
+            "куди прямує контейнер," + " а також дату прибуття контейнера в порт" +
+            "\n" +
+            "Просто вставте нормер контейнера та відправте боту." + "\n" +
+            "Якщо інформація є у відкритому доступі, Ви отримаєте відповідь";
 
     static final String YES_BUTTON = "YES_BUTTON";
     static final String NO_BUTTON = "NO_BUTTON";
@@ -49,11 +53,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.config = config;
         //Кнопка меню Бота.
         List<BotCommand> listOfCommands = new ArrayList<>();
-        listOfCommands.add(new BotCommand("/start", "get welcome message"));
+        listOfCommands.add(new BotCommand("/start", "Привітальне сповіщення"));
 //        listOfCommands.add(new BotCommand("/mydata", "get your data stored"));
         listOfCommands.add(new BotCommand("/register", "поклацать"));
 //        listOfCommands.add(new BotCommand("/deletedata","delete my data"));
-        listOfCommands.add(new BotCommand("/info", "Информация о Боте"));
+        listOfCommands.add(new BotCommand("/info", "Інформація про Чат Бота"));
 //        listOfCommands.add(new BotCommand("/settings","set your preferences"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
@@ -62,9 +66,10 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        ShippingInfo shippingInfo = new ShippingInfo();
+
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
@@ -92,16 +97,22 @@ public class TelegramBot extends TelegramLongPollingBot {
                         register(chatId);
                         break;
 
-
                     default:
-//
-//                        prepareAndSendMessage(chatId, "Я пока мало чего умею, но обязательно научусь!\n" + "Please Stand By");
-                    try{
-                        prepareAndSendMessage(chatId, Cont.getContInfo(messageText,shippingInfo));
-                    } catch (IOException e) {
-                        prepareAndSendMessage(chatId, "Information Not found");
-                    }
-//
+
+                        String response = Maersk.getContInfo(messageText);
+                        if (StringUtils.isNotEmpty(response)){
+                            prepareAndSendMessage(chatId, response);
+                        } else if (StringUtils.isNotEmpty(ShipmentLink.getContInfoo(messageText))) {
+                            prepareAndSendMessage(chatId, ShipmentLink.getContInfoo(messageText));
+                        } else {
+                            prepareAndSendMessage(chatId, "Інформація не знайдена.");
+                        }
+
+
+
+
+
+
                 }
             }
 
@@ -122,7 +133,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
-    private void register(long chatId) { // Метода для кнопок след. действия под сообщением
+    private void register(long chatId) { // Метод для кнопок след. действия под сообщением
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText("Нажмите кнопку Да или Нет");
@@ -171,7 +182,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String name) {
         //создаем ответ с эмоджи
-        String answer = EmojiParser.parseToUnicode("Привет " + name + ", это Чат Бот Ярослава. \n" + "Это первая попытка создания бота.\n" + "Просто вставьте и отправьте номер контейнера, если к нему есть информация, выдаст результат." + ":blush:" + ":ship:");
+        String answer = EmojiParser.parseToUnicode("Привіт " + name + ", це Чат Бот Ярослава Ковальчука. \n" + "Цей бот створено для полегшення роботи Менеджерів ЗЕД та Логістів.\n" + "Просто вставте та відправте боту номер контейнера, якщо по контейнеру є інформація у відкритому доступі, Ви отримаєте інформацію." + ":blush:" + ":ship:");
         // String answer = ;
         log.info("Replied to user " + name);
         sendMessage(chatId, answer);
