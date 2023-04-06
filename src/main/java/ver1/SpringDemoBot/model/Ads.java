@@ -6,7 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-
+//класс для рекламних сповіщень
 @Getter
 @Setter
 @Entity(name = "adsTable")
