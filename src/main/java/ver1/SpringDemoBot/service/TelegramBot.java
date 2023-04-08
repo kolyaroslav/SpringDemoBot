@@ -15,11 +15,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ver1.SpringDemoBot.model.*;
 import ver1.SpringDemoBot.сonfig.BotConfig;
@@ -44,19 +39,24 @@ public class TelegramBot extends TelegramLongPollingBot {
             "Просто вставте нормер контейнера та відправте боту." + "\n" +
             "Якщо інформація є у відкритому доступі, Ви отримаєте відповідь.";
 
-    static final String YES_BUTTON = "YES_BUTTON";
-    static final String NO_BUTTON = "NO_BUTTON";
+static final String CONT_SIZE = "Об'єм морських контейнерів: \n\n"+
+        "20 DV: загальний - 33,1 м3, \nкорисний - 25-29 м3 в залежності від вантажу.\n\n"+
+        "40 DV: загальний - 67,5 м3, \nкорисний - 54-58 м3 в залежності від вантажу.\n\n"+
+        "40 HC: загальний - 75,3 м3, \nкорисний - 64-68 м3 в залежності від вантажу.\n\n"+
+        "45 HC: загальний - 86,1 м3, \nкорисний - до 77 м3 в залежності від вантажу.\n\n"
+        ;
 
     static final String ERROR_TEXT = "Error occurred: ";
 
-    //кнопка /help
+    //Кнопки меню Бота.
     public TelegramBot(BotConfig config) {
         this.config = config;
-        //Кнопка меню Бота.
+
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Привітальне сповіщення"));
         listOfCommands.add(new BotCommand("/info", "Інформація про Чат Бота"));
         listOfCommands.add(new BotCommand("/currency", "Курс валют НБУ"));
+        listOfCommands.add(new BotCommand("/cont_size","Об'єм морських контейнерів"));
 
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
@@ -96,6 +96,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                         prepareAndSendMessage(chatId, MinFin.getCurrency(messageText));
                         break;
 
+                    case "/cont_size":
+                        prepareAndSendMessage(chatId, CONT_SIZE);
+                        break;
+
                     default:
 
                         String response = Maersk.getContInfo(messageText);
@@ -106,58 +110,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                         } else {
                             prepareAndSendMessage(chatId, "Інформація не знайдена.");
                         }
-
-
-
-
-
-
                 }
             }
 
         } else if (update.hasCallbackQuery()) {
-            String callBackData = update.getCallbackQuery().getData();
-            long messageId = update.getCallbackQuery().getMessage().getMessageId();
-            long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            if (callBackData.equals(YES_BUTTON)) {
-                String text = "Вы нажали конопку Да. С ув. Ваш Кэп";
-                executeEditMessageText(text, chatId, messageId);
-
-            } else if (callBackData.equals(NO_BUTTON)) {
-                String text = "Вы нажали конопку Нет. С ув. Ваш Кэп";
-                executeEditMessageText(text, chatId, messageId);
             }
 
         }
-    }
 
-//    private void register(long chatId) { // Метод для кнопок след. действия под сообщением
-//        SendMessage message = new SendMessage();
-//        message.setChatId(chatId);
-//        message.setText("Нажмите кнопку Да или Нет");
-//        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
-//        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>(); // лист в листе с храниением кнопок
-//        List<InlineKeyboardButton> rowInline = new ArrayList<>();
-//        var yesButton = new InlineKeyboardButton();
-//
-//        yesButton.setText("Да");
-//        yesButton.setCallbackData(YES_BUTTON);
-//
-//        var noButton = new InlineKeyboardButton();
-//
-//        noButton.setText("Нет");
-//        noButton.setCallbackData(NO_BUTTON);
-//
-//        rowInline.add(yesButton);
-//        rowInline.add(noButton);
-//
-//        rowsInline.add(rowInline);
-//
-//        markupInline.setKeyboard(rowsInline);
-//        message.setReplyMarkup(markupInline);
-//        executeMessage(message);
-//    }
+
+
 
     private void reigsterUser(Message msg) {
         if (userRepository.findById(msg.getChatId()).isEmpty()) {
@@ -197,28 +160,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
-//// добавляем кнопку под сообщением
-//        ReplyKeyboardRemove keyboardMarkup = new ReplyKeyboardRemove();
-//        List<KeyboardRow> keyboardRows = new ArrayList<>();
-////первый ряд кнопок
-////        KeyboardRow row = new KeyboardRow();
-////
-////        row.remove(row);
-////        row.remove(keyboardRows);
-//////второй ряд кнопок
-////        keyboardRows.add(row);
-////        row = new KeyboardRow();
-////        row.remove(keyboardRows);
-////        row.remove("check my data");
-////        row.remove("delete my data");
-//
-//        // список рядов
-//        keyboardRows.removeAll(keyboardRows);
-//
-//
-//        keyboardMarkup.getRemoveKeyboard();
-//
-//        message.setReplyMarkup(keyboardMarkup);
+
 
         executeMessage(message);
 

@@ -21,7 +21,7 @@ var document = Jsoup.connect("https://minfin.com.ua/ua/currency/").get(); // п�
 
 
 
-        return "Курс НБУ для розрахунку митних затрат: \n\n"
+        return "Курс НБУ для розрахунку митних платежів: \n\n"
                 + USD_elements.get(0).text() +": " + USD_elements.get(2).text().substring(0,7) + "\n\n"
                 + EURO_elements.get(0).text() +": " + EURO_elements.get(2).text().substring(0,7) + "\n\n"
                 + PLN_elements.get(0).text() +": " + PLN_elements.get(2).text().substring(0,7) + "\n\n";
