@@ -17,7 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ver1.SpringDemoBot.model.*;
-import ver1.SpringDemoBot.сonfig.BotConfig;
+import ver1.SpringDemoBot.config.BotConfig;
 
 import java.sql.Timestamp;
 
@@ -51,7 +51,6 @@ static final String CONT_SIZE = "Об'єм морських контейнері
     //Кнопки меню Бота.
     public TelegramBot(BotConfig config) {
         this.config = config;
-
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "Привітальне сповіщення"));
         listOfCommands.add(new BotCommand("/info", "Інформація про Чат Бота"));
